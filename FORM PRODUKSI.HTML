@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIS APPAREL - Approval</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#27ae60">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/27ae60/ffffff?text=KIS">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <style>
+        :root { --line: #000; --accent: #1a1a1a; }
+        body { font-family: 'Arial', sans-serif; background: #333; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .no-print { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .btn-save { padding: 15px 40px; background: #27ae60; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        #approval-canvas { width: 1122px; height: 794px; background: #fff; padding: 40px; box-sizing: border-box; border: 1px solid #000; display: flex; flex-direction: column; position: relative; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--line); padding-bottom: 10px; margin-bottom: 15px; }
+        .header h1 { margin: 0; font-size: 32px; font-style: italic; font-weight: 900; }
+        .layout-table { width: 100%; border: 2px solid var(--line); border-collapse: collapse; table-layout: fixed; }
+        .layout-table td { border: 1px solid var(--line); vertical-align: top; padding: 0; }
+        .design-section { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; height: 500px; }
+        .img-box { width: 100%; height: 420px; border: 1px dashed #ddd; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .title-label { background: #000; color: #fff; width: 100%; padding: 10px; text-align: center; font-weight: bold; margin-top: 10px; font-size: 14px; }
+        .data-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .data-table td { border: 1px solid var(--line); padding: 5px 8px; font-size: 12px; height: 31px; box-sizing: border-box; }
+        .label-bg { background: #f2f2f2; font-weight: bold; width: 80px; }
+        input, textarea { width: 100%; border: none; font-family: inherit; font-size: 12px; outline: none; background: transparent; color: #000; }
+        input[type="number"] { text-align: center; font-weight: bold; }
+        .size-header { background: #eee; font-weight: bold; text-align: center; font-size: 11px; height: 26px; }
+        .total-black { background: #000; color: white; font-weight: bold; text-align: center; height: 38px; }
+        .footer-table { width: 100%; margin-top: 15px; border-collapse: collapse; table-layout: fixed; border: 1px solid #000; }
+        .footer-table td { border: 1px solid var(--line); padding: 10px; vertical-align: top; height: 95px; }
+        .check-item { display: inline-block; width: 45%; font-weight: bold; font-size: 11px; margin-bottom: 8px; }
+        .sq-box { width: 14px; height: 14px; border: 2px solid #000; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <button class="btn-save" onclick="saveJpg()">DOWNLOAD HASIL PRO (JPG)</button>
+        <button class="btn-save" style="background:#34495e" onclick="location.reload()">RESET FORM</button>
+    </div>
+
+    <div id="approval-canvas">
+        <div class="header">
+            <h1>FORM APPROVAL DESAIN</h1>
+            <div style="text-align:right">
+                <span style="font-weight:bold; color:var(--accent); font-size: 32px; font-family: 'Arial Black';">KIS APPAREL</span><br>
+                <small style="font-weight: bold; letter-spacing: 2px;">APPAREL MANUFACTURER</small>
+            </div>
+        </div>
+
+        <table class="layout-table">
+            <tr>
+                <td style="width: 650px;">
+                    <div class="design-section">
+                        <div class="img-box" onclick="document.getElementById('fileIn').click()">
+                            <span id="hint" style="color: #ccc;">[ Klik Upload Desain ]</span>
+                            <img id="preview" style="display:none;">
+                        </div>
+                        <input type="file" id="fileIn" style="display: none;" accept="image/*" onchange="showImg(this)">
+                        <div class="title-label">DETAIL VISUAL PRODUKSI</div>
+                    </div>
+                </td>
+                <td>
+                    <table class="data-table">
+                        <tr><td class="label-bg">Customer</td><td colspan="2"><input type="text" id="cname"></td></tr>
+                        <tr><td class="label-bg">No. Order</td><td colspan="2"><input type="text"></td></tr>
+                        <tr><td class="label-bg">Tgl Order</td><td colspan="2"><input type="date"></td></tr>
+                        <tr><td class="label-bg">Bahan</td><td colspan="2"><input type="text" value="Drifit M-Tiis"></td></tr>
+                        <tr><td class="label-bg">Sablon</td><td colspan="2"><input type="text" value="Sublime"></td></tr>
+                        <tr class="size-header"><td style="width:80px">SIZE</td><td>PDK</td><td>PJG</td></tr>
+                        <tr><td class="label-bg" style="text-align:center">S</td><td><input type="number" class="qty" oninput="recalc()"></td><td><input type="number" class="qty" oninput="recalc()"></td></tr>
+                        <tr><td class="label-bg" style="text-align:center">M</td><td><input type="number" class="qty" oninput="recalc()"></td><td><input type="number" class="qty" oninput="recalc()"></td></tr>
+                        <tr><td class="label-bg" style="text-align:center">L</td><td><input type="number" class="qty" oninput="recalc()"></td><td><input type="number" class="qty" oninput="recalc()"></td></tr>
+                        <tr><td class="label-bg" style="text-align:center">XL</td><td><input type="number" class="qty" oninput="recalc()"></td><td><input type="number" class="qty" oninput="recalc()"></td></tr>
+                        <tr><td class="label-bg" style="text-align:center">XXL/3XL</td><td><input type="number" class="qty" oninput="recalc()"></td><td><input type="number" class="qty" oninput="recalc()"></td></tr>
+                        <tr><td class="label-bg" style="text-align:center">4XL/5XL</td><td><input type="number" class="qty" oninput="recalc()"></td><td><input type="number" class="qty" oninput="recalc()"></td></tr>
+                        <tr><td class="label-bg" style="text-align:center">6XL</td><td><input type="number" class="qty" oninput="recalc()"></td><td><input type="number" class="qty" oninput="recalc()"></td></tr>
+                        <tr class="total-black"><td>TOTAL</td><td colspan="2" id="total" style="font-size: 16px;">0 PCS</td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        <table class="footer-table">
+            <tr>
+                <td style="width: 400px; font-size: 11px;"><b>PENTING:</b> Teliti desain & size. ACC berarti setuju produksi. Kesalahan setelah gambar disetujui bukan tanggung jawab kami.</td>
+                <td>
+                    <div class="check-item"><div class="sq-box"></div> BAHAN</div>
+                    <div class="check-item"><div class="sq-box"></div> POTONG</div>
+                    <div class="check-item"><div class="sq-box"></div> SABLON</div>
+                    <div class="check-item"><div class="sq-box"></div> JAHIT</div>
+                </td>
+                <td style="text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                    <small>Persetujuan Customer (ACC)</small>
+                    <div><hr style="border: 0.5px solid #000; width: 80%; margin: 0 auto 5px;"><small>Tanda Tangan</small></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // Registrasi Service Worker untuk Mode Offline
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+
+        function showImg(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('preview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('hint').style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function recalc() {
+            let t = 0;
+            document.querySelectorAll('.qty').forEach(i => {
+                let val = parseInt(i.value);
+                if (!isNaN(val)) t += val;
+            });
+            document.getElementById('total').innerText = t + " PCS";
+        }
+
+        function saveJpg() {
+            const node = document.getElementById('approval-canvas');
+            const customer = document.getElementById('cname').value || 'Customer';
+            const btn = document.querySelector('.btn-save');
+            btn.innerText = "Processing...";
+            domtoimage.toJpeg(node, { quality: 0.95, bgcolor: '#ffffff', width: 1122, height: 794 })
+            .then(function (dataUrl) {
+                var link = document.createElement('a');
+                link.download = 'KIS_APPAREL_' + customer + '.jpg';
+                link.href = dataUrl;
+                link.click();
+                btn.innerText = "DOWNLOAD HASIL PRO (JPG)";
+            });
+        }
+    </script>
+</body>
+</html>
